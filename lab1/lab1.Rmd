@@ -1,0 +1,86 @@
+---
+title: "lab1"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+
+library(rio)
+library(here)
+library(tidyverse)
+library(forcats)
+library(lubridate)
+library(ggplot2)
+knitr::opts_chunk$set(echo = TRUE)
+
+
+```
+
+
+```{r load data}
+
+pth <- here("data", "rstats_tweets.rds")
+data <- import(pth)
+
+```
+
+```{r commit 2}
+
+#data cleaning 
+screen_name_data <- data %>% 
+  select(screen_name) %>% 
+  count(screen_name) %>% 
+  arrange(desc(n)) %>% 
+  slice(1:25) %>% 
+  mutate(screen_name = fct_reorder(screen_name, n))
+
+#plot commit 2
+
+ggplot(screen_name_data, aes(x = screen_name, y = n)) +
+    geom_bar(stat = "identity") +
+    coord_flip()
+
+```
+```{r commit 3}
+ggplot(screen_name_data, aes(x = screen_name, y = n)) +
+    geom_bar(stat = "identity", fill = "steelblue") +
+    coord_flip() + 
+  labs(title = "Most prolific #rtats tweeters", x = "Twitter Screen Name", y = "Count", subtitle = "Top 25 screen names displayed", caption = "Data from Mike Kearny, distributed via #tidytuesday") +
+  theme_minimal() +
+  theme(panel.grid.major.y = element_blank(), panel.grid.major.x = element_line(color = "grey"))
+  
+  
+```
+
+```{r commit 4, fig.width=5, fig.height=5}
+
+d2 <- data %>%
+  mutate(month = round_date(created_at, unit = "month")) %>%
+  filter(month < as_datetime("2019-01-01 00:00:00"))
+
+d3 <- d2 %>%
+  count(month)
+
+d3 %>%
+  ggplot(aes(month, n)) +
+  geom_line() +
+  geom_smooth(alpha = 0.3)
+
+```
+
+
+```{r commit 5}
+
+d3 %>%
+  ggplot(aes(month, n)) +
+  geom_line() +
+  geom_smooth(method = "loess", color = "magenta", se = FALSE) +
+  geom_area(color = "grey30", fill = "cornflowerblue", alpha = 0.3) +
+  theme_minimal(base_size = 10) +
+  labs(title = "Growth of the #rstats hashtag on twitter over time",
+       x = "Year (data summarized by month)",
+       y = "Number of #rstats tweets",
+       caption = "Data from Mike Kearny, distributed via #tidytuesday")
+
+```
+

@@ -1,0 +1,63 @@
+---
+title: "homework_1"
+author: "Asha Yadav"
+date: "1/26/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(dplyr)
+library(rio)
+library(here)
+assessment <- import(here("anonymisedData/assessments.csv"))
+courses<- import(here("anonymisedData/courses.csv"))
+studentAssessment<- import(here("anonymisedData/studentAssessment.csv"))
+info<- import(here("anonymisedData/studentinfo.csv"))
+registration<- import(here("anonymisedData/studentRegistration.csv"))
+student_vle<- import(here("anonymisedData/studentVle.csv"))
+vle<- import(here("anonymisedData/vle.csv"))
+```
+#The primary components of this assignment are highly open-ended. These are to
+
+Use at least 3 mutating joins
+Use at least 1 filtering join
+Produce at least 3 data displays
+Following the completion of these requirements, please reproduce the following figure.
+
+
+```{r mutating joins #1}
+
+
+```
+```{r mutating joins #2}
+
+```
+```{r mutating joins #3}
+
+```
+```{r filtering join #1}
+
+```
+```{r data display #1}
+
+```
+```{r data display #2}
+
+```
+```{r data display #3}
+
+```
+```{r figure reproduced}
+
+```
+```{r extra credit}
+
+```
+
+
+
+
+
+

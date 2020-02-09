@@ -1,0 +1,111 @@
+---
+title: "homework_1"
+author: "Asha Yadav"
+date: "1/26/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE,warning=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(dplyr)
+library(rio)
+library(here)
+assessment <- import(here("anonymisedData/assessments.csv"))
+courses<- import(here("anonymisedData/courses.csv"))
+studentAssessment<- import(here("anonymisedData/studentAssessment.csv"))
+info<- import(here("anonymisedData/studentinfo.csv"))
+registration<- import(here("anonymisedData/studentRegistration.csv"))
+student_vle<- import(here("anonymisedData/studentVle.csv"))
+vle<- import(here("anonymisedData/vle.csv"))
+```
+
+# Mutate
+Left_join, Right_join, and inner_join: Assessment dataset (primary key: id_assessment) and studentAssessment (foreign key: id_assessment) dataset are connected together using left_join, right_join and inner_join.
+
+Another set of mutating joins are demonstrated using VLE (primary key: id_site)dataset and student_vle(foreign key: id_site)dataset.
+
+```{r}
+example_1a_left<- left_join(assessment, studentAssessment, by = "id_assessment")
+example_2a_right<- right_join(studentAssessment, assessment, by = "id_assessment")
+example_3a_inner<- inner_join(assessment, studentAssessment, by = "id_assessment")
+```
+```{r}
+example_1b_left<- left_join(vle, student_vle, by = "id_site")
+example_2b_right<- right_join(vle, student_vle, by = "id_site")
+example_3b_inner<- inner_join(vle, student_vle, by = "id_site")
+
+```
+# Filtering
+## Semi_join
+I used semi_join to join VLE (primary key: id_site) and students_vle (foreign_key: id_site) datasets. 
+```{r }
+example_semi<- semi_join(vle, student_vle, by = "id_site")
+
+```
+```{r}
+info_1<- inner_join(info, 
+                  studentAssessment, 
+                  by = "id_student")%>%
+  select(id_student, gender, highest_education, final_result, score)%>%
+  group_by(id_student, gender, highest_education, final_result)%>%
+  summarise(average_score = mean(score))
+
+ggplot(info_1, aes(x= final_result, fill = gender)) +
+  geom_bar(position = "dodge") +
+  scale_fill_discrete() +
+  xlab("Final result") +
+  theme_minimal()
+
+
+```
+
+
+
+```{r}
+
+ggplot(info_1, aes(x = final_result, y= average_score, fill = gender)) +
+  geom_boxplot(color = "blue") +
+  scale_color_manual(values = c("#999999", 
+                                "#E69F00", 
+                                "#56B4E9"))+ 
+  xlab("Final result") + 
+  ylab("Average score")
+
+```
+
+
+```{r}
+
+ggplot(info_1, aes(x = average_score, color = gender, fill = gender)) +
+  geom_histogram(aes(y =..density..), alpha = 0.2,
+                 position = "identity", bins = 25) +
+  geom_density(alpha= .2) +
+  xlab("Average score")
+```
+
+
+```{r }
+
+  info_2<- info_1%>%
+  group_by(highest_education, average_score, gender, final_result)%>%
+  summarise()
+
+  ggplot(info_2, aes(highest_education, average_score)) +
+  geom_line(aes(color = gender)) +
+  geom_point(aes(color = gender)) +
+  coord_flip() + ylim(60, 90) +
+  facet_wrap(~final_result, nrow = 4) +
+  theme_minimal() + 
+  xlab("Highest Education") +
+  ylab("Average Score")
+```
+```{r extra credit}
+
+```
+
+
+
+
+
+

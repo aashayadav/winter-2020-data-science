@@ -1,0 +1,182 @@
+---
+title: "Lab2"
+author: "Asha Yadav"
+date: "1/15/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(rio)
+library(tidyverse)
+library(tidyr)
+
+```
+```{r, load data}
+lab<- import("https://github.com/fivethirtyeight/data/raw/master/alcohol-consumption/drinks.csv")
+
+lab_2 <- lab%>%
+  rename(
+    beer = beer_servings,
+    spirit = spirit_servings,
+    wine = wine_servings
+  )
+```
+
+
+```{r, overall distribution}
+ggplot(lab_2, aes(x = total_litres_of_pure_alcohol)) +
+  geom_histogram(alpha= 0.5, 
+                 fill = "red", 
+                 color = "white") + 
+  labs(x = "Total alcohol consumption", 
+       y = "In litres", 
+       title = "Overall distribution of alcohol consumption")
+
+
+#NOTES: names_pattern = (.+)-servings      it is used to drop part of name in pivot_longer and pivot_wider.
+# or names_pattern = beer_(.+) Anything before the parentheses is kept in the name and anything after the parentheses are dropped. 
+```
+
+
+# HISTOGRAM
+
+I would use histogram version 2 (bin = 20). It is easily interpretable visually as compared to version 1 (bin = 5) and 3 (bin = 60). Version 2 clearly shows that distribution is positively skewed. In version 1, skewness of the distribution is not clear. In version 3 skewness is visible, however it looks noisy and lacks clarity.
+
+
+```{r, histogram version 1}
+ggplot(lab_2, 
+       aes(x = total_litres_of_pure_alcohol)) +
+  geom_histogram(fill = "cornflowerblue", 
+                 color = "white", 
+                 alpha = 0.5, 
+                 bins = 5) + 
+  labs(x = "Total alcohol consumption", 
+       y = "In litres", 
+       title = "Overall distribution of alcohol consumption")
+
+```
+
+
+```{r, histogram version 2}
+ggplot(lab_2, 
+       aes(x = total_litres_of_pure_alcohol)) +
+  geom_histogram(fill = "cornflowerblue", 
+                 color = "white", 
+                 alpha = 0.5, bins = 20) + 
+  labs(x = "Total alcohol consumption", 
+       y = "In litres", 
+       title = "Overall distribution of alcohol consumption")
+
+```
+```{r, histogram version 3}
+ggplot(lab_2, 
+       aes(x = total_litres_of_pure_alcohol)) +
+  geom_histogram(fill = "cornflowerblue", 
+                 color = "white", 
+                 alpha = 0.5, 
+                 bins = 60) + 
+  labs(x = "Total alcohol consumption", 
+       y = "In litres", 
+       title = "Overall distribution of alcohol consumption")
+```
+
+# DENSITY PLOT
+I would prefer density plot version 1 (bw = 1) over version 2 (bw = 0.5) and version 3 (bw = 0.2). Version 1 is clearly showing the positive skewness in the distribution and density. Peaks in the plot show where the proportion of alcohol consumption is high. Default version seems to be close to version 1 but version 2 and 3 have two many peaks making the plot cluttered.  
+```{r, density plot default}
+ggplot(lab_2, aes(total_litres_of_pure_alcohol)) +
+  geom_density(fill = "lavender")
+```
+```{r, density plot version 1}
+ggplot(lab_2, aes(total_litres_of_pure_alcohol)) + 
+  geom_density(fill = "lavender", bw = 1) + 
+  xlab("Total alcohol consumption")
+
+```
+
+```{r density plot, version 2}
+ggplot(lab_2, aes(total_litres_of_pure_alcohol)) + 
+  geom_density(fill = "lavender", bw = 0.5) + 
+  xlab("Total alcohol consumption")
+```
+```{r, density plot version 3}
+ggplot(lab_2, aes(total_litres_of_pure_alcohol)) + 
+  geom_density(fill = "lavender", bw = 0.2) + 
+  xlab("Total alcohol consumption")
+```
+
+
+```{r reorganise the data}
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+
+plot_data <- lab_2 %>% 
+  select("country", "beer", "spirit", "wine")%>%
+  pivot_longer(col = -"country",
+               names_to = "type",
+               values_to = "servings")
+  
+```
+# Evaluate 
+
+At first glance, method 1 looks clear and visually easy to understand as compared to method 2 and 3. However, I would use method 3 becasue of amount of information it presents.Method 3 presents more information including the information presented in method 1 (highest consumption of beer) for e.g. by comparing the peaks we get the amount of consumption and skewness is showing the distribution of consumption of types of beverages.
+Method 2 presents same information as method 3 but visually may be less appealing to the user.
+```{r, method 1, 2 and 3}
+
+#Method 1
+ggplot(plot_data, aes(type, servings, fill = type)) +
+  geom_col()
+
+
+#Method 2
+ggplot(plot_data, aes(type)) +
+  geom_density()
+
+#Method 3
+ggplot(plot_data, aes(type)) +
+  geom_density(aes(fill = type, alpha = 0.1))
+
+
+```
+```{r, reproduce the plot}
+
+plot_top25 <- lab_2 %>% 
+  arrange(desc(total_litres_of_pure_alcohol)) %>% 
+  slice(1:25) %>% 
+  group_by(country) %>% 
+  select(-"total_litres_of_pure_alcohol") %>% 
+  pivot_longer(-country, 
+               names_to = "type",
+               values_to = "servings")
+
+ggplot(plot_top25, aes(fill = type, x = country, y = servings)) +
+  geom_bar(position = "fill", stat = "identity") +
+  coord_flip() +
+  scale_y_continuous(expand = c(0, 0)) + 
+  theme_minimal() + 
+  labs(title = "Alcohol consumption by type",
+       subtitle = "Top 25 countries displayed (according to total litres consumed)",
+       y = "Proportion of total alcohol consumed",
+       color = "Alcohol type") +
+  theme(legend.position = "bottom") +
+  scale_fill_viridis_d() +
+  theme(axis.title.y = element_blank()) + 
+  guides(fill = guide_legend(reverse = TRUE)) + 
+  scale_fill_brewer(palette = "Paired", 
+                    name = "Alcohol type", 
+                    labels = c("Beer", "Spirit", "Wine")) + 
+  theme(plot.title = element_text(hjust= -0.3),
+        plot.subtitle = element_text(hjust = -0.6))
+ 
+ 
+
+
+
+  
+
+```
+
+Tried hard but couldnt sove the last exercise.
+
+

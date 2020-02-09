@@ -1,0 +1,27 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1580106241936.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "1256286021",
+    "id" : "B4FA05C0",
+    "lastKnownWriteTime" : 1580107323,
+    "last_content_update" : 1580107323585,
+    "path" : "C:/Users/asha/Desktop/Winter 2020/EDLD 610 Data Science 2/homework_1/homework_1.Rmd",
+    "project_path" : "homework_1.Rmd",
+    "properties" : {
+        "cursorPosition" : "13,0",
+        "last_setup_crc32" : "124430282cb849ea",
+        "scrollLine" : "0",
+        "tempName" : "Untitled1"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}

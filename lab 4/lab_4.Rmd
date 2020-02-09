@@ -1,0 +1,158 @@
+---
+title: "lab_4"
+author: "Asha Yadav"
+date: "2/5/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      eval = TRUE,
+                      warning = FALSE,
+                      message = FALSE)
+```
+```{r}
+library(tidyverse)
+library(rio)
+library(here)
+library(cowplot)
+library(colorspace)
+library(colorblindr)
+
+
+```
+```{r}
+data_honey<- import("C:/Users/asha/Desktop/Winter 2020/EDLD 610 Data Science 2/lab 4/data/honeyproduction.csv")
+data_lab4<- import("C:/Users/asha/Desktop/Winter 2020/EDLD 610 Data Science 2/lab 4/data/lab4data.csv")
+
+```
+1. Total production of honey across years by state.
+
+```{r}
+
+data_1<- data_honey%>%
+  select(state,totalprod,year)
+  
+
+ggplot(data_1, 
+       aes(x = state,
+           y = totalprod)) + 
+  geom_col(width = 0.8) +
+  geom_col(data = filter(data_1,
+                         state == "OR"|
+                         state == "WA"|
+                         state == "CA"),
+           fill = "#C55644") +
+  coord_flip() +
+  scale_y_continuous(expand = c(0, 0)) +
+  theme_minimal() +
+  theme(axis.text.y = element_text(size= 7))+
+  xlab("State") + ylab("Total honey production")
+  
+```
+
+
+2. Reproduce the plot according to three different kinds of color blindness, as well as a desaturated version.
+
+```{r}
+P<- ggplot(data_1, 
+       aes(x = state,
+           y = totalprod,
+           fill = state)) + 
+  geom_col(width = 0.8) +
+  coord_flip() +
+  scale_y_continuous(expand = c(0, 0)) +
+  theme_minimal() +
+  theme(axis.text.y = element_text(size= 7))+
+  xlab("State") + ylab("Total honey production") +
+  theme(legend.position = "none")
+  cvd_grid(P)
+  
+```
+
+
+3. Reproduce the plot using a colorblind safe pallette.
+
+```{r}
+P + scale_color_OkabeIto()
+
+```
+
+4. Join the lab4 data with honey production data.
+
+Honeyproduction data (foregin key: state) and lab4 data(primary key: state)
+
+```{r}
+data_honey<- data_honey%>%
+  rename("State Code" = state)
+  
+merged_dataset<- inner_join(data_honey,
+                            data_lab4,
+                            by = "State Code")
+```
+
+Produce a bar plot displaying the average honey for each state across years.
+
+Pattern: No difference in the pattern have been observed in plot with 'totalprod' and  plot with 'average_honey'.
+
+```{r}
+merged_dataset_p <- merged_dataset %>%
+  select("State", "Region", "totalprod")%>%
+  group_by(State, Region)%>%
+  summarise(average_honey = mean(totalprod, na.rm = TRUE))
+
+ggplot(merged_dataset_p, 
+       aes(x = State,
+           y = average_honey)) +
+  geom_col(aes(fill = Region), width = 0.8) +
+  coord_flip() +
+  scale_y_continuous(expand = c(0, 0)) +
+  theme_minimal() +
+  ylab("Average honey") +
+  scale_fill_OkabeIto() +
+  theme(axis.text.y = element_text(size= 7))
+
+```
+
+Create a heatmap displaying the average honey production across years by region
+
+```{r}
+merged_dataset_heat <- merged_dataset %>%
+  select("Region", "totalprod", "year")%>%
+  group_by(Region, year)%>%
+  summarise(average_honey = mean(totalprod, na.rm = TRUE))
+
+ggplot() +
+  geom_tile(data = merged_dataset_heat,
+            mapping = aes(x = Region,
+                          y = year,
+                          fill = average_honey),
+            alpha = 0.5) +
+  scale_fill_gradient(high = "#e34a33", low = "#fee8c8")
+
+  
+```
+
+Create at least one more plot of your choosing using color to distinguish, represent data values, or highlight.
+
+```{r}
+library(usmap)
+
+state_honey <- merged_dataset %>%
+  select("State Code","totalprod")%>%
+  rename("state" = "State Code")
+
+
+plot_usmap(data = state_honey,
+           values = "totalprod", 
+           labels = TRUE,
+           label_color = "red") +
+  scale_fill_gradient(low = "white", 
+                      high = "red", 
+                      name = "Total honey prod.") +
+  theme(legend.position = "right") +
+  labs(title = "Total honey production in the US states")
+
+```
+
+
